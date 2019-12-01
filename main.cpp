@@ -208,6 +208,34 @@ bool is_num(const char *str)
 	return true;
 }
 
+long get_number(const char* str)
+{
+	const char hex_pattern[] = "0x";
+	size_t hex_pattern_len = strlen(hex_pattern);
+
+	const size_t len = strlen(str);
+	if (len == 0) return 0;
+
+	size_t cmp_len = len;
+	if (len > hex_pattern_len) cmp_len = hex_pattern_len;
+
+	long out = 0;
+
+	try {
+		if (strncmp(str, hex_pattern, cmp_len) == 0) {
+			out = std::stoul(str, nullptr, 16);
+		}
+		else {
+			out = std::stoul(str, nullptr, 10);
+		}
+	}
+	catch (const std::exception & e) {
+		print_in_color(WARNING_COLOR, "Invalid parameter: ");
+		std::cout << str << "\n";
+	}
+	return out;
+}
+
 int main(int argc, char *argv[])
 {
 	if (argc < 2) {
@@ -258,11 +286,7 @@ int main(int argc, char *argv[])
 			i++;
 		}
 		else if (!strcmp(param, PARAM_PID) && (i + 1) < argc) {
-			if (std::strncmp(argv[i + 1], "0x", 0) == 0 && (strlen(argv[i + 1]) > 2)) {
-				args.pid = std::stoul(argv[i + 1], nullptr, 16);
-            		} else {
-                		args.pid = atoi(argv[i + 1]);
-            		}
+			args.pid = get_number(argv[i + 1]);
 			++i;
 		}
 		else if (!strcmp(param, PARAM_VERSION)) {
